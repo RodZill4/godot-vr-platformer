@@ -1,0 +1,28 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://objects/player/player.gd" type="Script" id=2]
+[ext_resource path="res://objects/player/robot.tscn" type="PackedScene" id=3]
+
+[sub_resource type="CapsuleShape" id=1]
+radius = 0.162409
+height = 0.766036
+
+[node name="Player" type="KinematicBody"]
+input_ray_pickable = false
+collision_layer = 3
+collision_mask = 3
+collision/safe_margin = 0.01
+script = ExtResource( 2 )
+run_speed = 0.001
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0.543623, 0 )
+shape = SubResource( 1 )
+
+[node name="Robot" parent="." instance=ExtResource( 3 )]
+transform = Transform( 0.2, 0, 0, 0, 0.2, 0, 0, 0, 0.2, 0, -0.0826924, 0 )
+
+[node name="RespawnTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+[connection signal="timeout" from="RespawnTimer" to="." method="_on_RespawnTimer_timeout"]

@@ -1,0 +1,162 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://objects/floor_dist.png" type="Texture" id=1]
+
+[sub_resource type="BoxShape" id=1]
+extents = Vector3( 22, 0.1, 7 )
+
+[sub_resource type="BoxShape" id=2]
+extents = Vector3( 22, 1, 0.25 )
+
+[sub_resource type="SpatialMaterial" id=3]
+albedo_color = Color( 0.533333, 0.533333, 0.533333, 1 )
+
+[sub_resource type="CubeMesh" id=4]
+material = SubResource( 3 )
+size = Vector3( 44, 0.2, 14 )
+
+[sub_resource type="Shader" id=9]
+code = "shader_type spatial;
+render_mode blend_mix,depth_draw_opaque,cull_back,diffuse_burley,specular_schlick_ggx;
+uniform sampler2D texture_dist : hint_albedo;
+uniform float step_size;
+uniform vec4 albedo_1 : hint_color;
+uniform vec4 albedo_2 : hint_color;
+uniform float albedo_limit;
+uniform float specular;
+uniform float metallic_1;
+uniform float metallic_2;
+uniform float metallic_limit;
+uniform float roughness_1;
+uniform float roughness_2;
+uniform float roughness_limit;
+uniform vec4 emission_1 : hint_color;
+uniform vec4 emission_2 : hint_color;
+uniform float emission_limit;
+uniform float emission_energy;
+
+void vertex() {
+	vec4 world_vertex = WORLD_MATRIX*vec4(VERTEX, 1.0);
+	UV=0.25*world_vertex.xz;
+}
+
+float mystep(float a, float b) {
+	return clamp(0.5+(b-a)/step_size, 0.0, 1.0);
+}
+
+void fragment() {
+	vec2 base_uv = UV;
+	float dist = texture(texture_dist, base_uv).x;
+	ALBEDO = mix(albedo_1, albedo_2, mystep(dist, albedo_limit)).rgb;
+	METALLIC = mix(metallic_1, metallic_2, mystep(dist, metallic_limit));
+	ROUGHNESS = mix(roughness_1, roughness_2, mystep(dist, roughness_limit));
+	SPECULAR = specular;
+	EMISSION = mix(emission_1, emission_2, mystep(dist, emission_limit)).rgb*emission_energy*(0.3*cos(TIME*3.0)+0.7);
+}
+"
+
+[sub_resource type="ShaderMaterial" id=10]
+shader = SubResource( 9 )
+shader_param/step_size = 0.025
+shader_param/albedo_1 = Color( 0.211765, 0.501961, 0.952941, 1 )
+shader_param/albedo_2 = null
+shader_param/albedo_limit = 0.08
+shader_param/specular = 0.5
+shader_param/metallic_1 = 1.0
+shader_param/metallic_2 = null
+shader_param/metallic_limit = 0.08
+shader_param/roughness_1 = null
+shader_param/roughness_2 = 1.0
+shader_param/roughness_limit = 0.145
+shader_param/emission_1 = Color( 0, 0, 0, 1 )
+shader_param/emission_2 = Color( 0.407843, 0.478431, 0.92549, 1 )
+shader_param/emission_limit = 0.022
+shader_param/emission_energy = 1.0
+shader_param/texture_dist = ExtResource( 1 )
+
+[sub_resource type="SpatialMaterial" id=7]
+albedo_color = Color( 0.301961, 0.301961, 0.301961, 1 )
+
+[sub_resource type="CubeMesh" id=8]
+material = SubResource( 7 )
+size = Vector3( 44, 2, 0.5 )
+
+[node name="Level1" type="Spatial"]
+__meta__ = {
+"_editor_description_": "
+"
+}
+
+[node name="StaticBody" type="StaticBody" parent="."]
+
+[node name="CollisionFloor1" type="CollisionShape" parent="StaticBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, -15 )
+shape = SubResource( 1 )
+
+[node name="CollisionFloor2" type="CollisionShape" parent="StaticBody"]
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 15, -0.1, 0 )
+shape = SubResource( 1 )
+
+[node name="CollisionFloor3" type="CollisionShape" parent="StaticBody"]
+transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 9.53674e-07, -0.1, 15 )
+shape = SubResource( 1 )
+
+[node name="CollisionFloor4" type="CollisionShape" parent="StaticBody"]
+transform = Transform( 1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, -15, -0.1, 9.53674e-07 )
+shape = SubResource( 1 )
+
+[node name="CollisionWall1" type="CollisionShape" parent="StaticBody"]
+transform = Transform( 1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, -22, 1, 0 )
+shape = SubResource( 2 )
+
+[node name="CollisionWall2" type="CollisionShape" parent="StaticBody"]
+transform = Transform( 1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, 22, 1, 0 )
+shape = SubResource( 2 )
+
+[node name="CollisionWall3" type="CollisionShape" parent="StaticBody"]
+transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 9.61651e-07, 1, -22 )
+shape = SubResource( 2 )
+
+[node name="CollisionWall4" type="CollisionShape" parent="StaticBody"]
+transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -9.61651e-07, 1, 22 )
+shape = SubResource( 2 )
+
+[node name="Floor1" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, -15 )
+mesh = SubResource( 4 )
+material/0 = SubResource( 10 )
+
+[node name="Floor2" type="MeshInstance" parent="."]
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -15, -0.2, 6.55671e-07 )
+mesh = SubResource( 4 )
+material/0 = SubResource( 10 )
+
+[node name="Floor3" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.2, 15 )
+mesh = SubResource( 4 )
+material/0 = SubResource( 10 )
+
+[node name="Floor4" type="MeshInstance" parent="."]
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 15, -0.2, -6.55671e-07 )
+mesh = SubResource( 4 )
+material/0 = SubResource( 10 )
+
+[node name="Wall1" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -22 )
+mesh = SubResource( 8 )
+material/0 = null
+
+[node name="Wall2" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 22 )
+mesh = SubResource( 8 )
+material/0 = null
+
+[node name="Wall3" type="MeshInstance" parent="."]
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -22, 0.9, 9.61651e-07 )
+mesh = SubResource( 8 )
+material/0 = null
+
+[node name="Wall4" type="MeshInstance" parent="."]
+transform = Transform( -4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 22, 0.9, -9.61651e-07 )
+mesh = SubResource( 8 )
+material/0 = null
